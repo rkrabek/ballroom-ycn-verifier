@@ -6,12 +6,16 @@ import pickle
 import helpers
 import comp_res_references
 
+# loads in pickle file with competitor results
 competitors = {}
 pf_in = open("comp_res.p", "rb")
 print "loading pickle file"
 competitors = pickle.load(pf_in)
 print "done loading"
 
+competition = raw_input("Please enter event id as found on in the url of the entries list")
+
+# determines if competitor has placed out based on current level points and points in 2 levels above
 def check_eligibility_pts(name, level, style, dance):
     def pt_lookup(level):
         try:
@@ -36,7 +40,8 @@ def check_eligibility_pts(name, level, style, dance):
         else:
             return ((pt_trickle < 7), pt_trickle)
 
-def entries_post(event):
+# post request to see all entries of an event
+def entries_post(competition):
 
     url = "http://entries.o2cm.com/default.asp"
     
@@ -60,7 +65,7 @@ def entries_post(event):
                 "selSty": "",
                 "submit": "OK",
                 "selEnt": "",
-                "event": event
+                "event": competition
     }
     
     r = requests.post(url, headers=headers, data=payload).text
@@ -68,72 +73,14 @@ def entries_post(event):
     entries = soup.find_all('td', {"class":["h5b", "h5n"]})
     return entries
 
-# def get_entry_level(header):
-#     level = ""
-#     level_try = re.findall("((Newcomer)|(Bronze)|(Silver)|(Gold)|(Novice)|(Championship))", header)
-#     if len(level_try) == 0:
-#         level_try = re.findall("((Beginner)|(Intermediate)|(Advanced)|(Syllabus)|(Open)|(Pre-Champ))", header)
-#         if len(level_try) == 0:
-#             print "Level not found in" + header
-#             level = header
-#         else:
-#             level = level_try[0][0]
-#         if level == "Pre-Champ":
-#             level = "PreChamp"
-#         elif level == "Beginner" or level == "Syllabus":
-#             level = "Bronze"
-#         elif level == "Intermediate":
-#             level = "Silver"
-#         elif level == "Advanced":
-#             level = "Gold"
-#         elif level == "Open":
-#             level = "Championship"
-#     else:
-#         level = level_try[0][0]
-#     return level
-
-# def get_entry_dances(header):
-#     start = header.find("(")
-#     end = header.find(")")
-#     dances = re.findall("([WTVFQCRSJPMB])", header[start:end])
-#     return dances
-
-# def get_entry_style(entry, dances):
-#     style = ""
-#     dances_expanded = []
-#     style_try = re.findall("((Standard)|(Latin)|(Rhythm)|(Smooth))", entry)
-#     if len(style_try) == 0:
-#         style_try = re.findall("((Intl\.|Am\.|Ballroom))", entry)
-        
-#         if len(style_try) == 0:
-#             print "Style not found in" + entry
-#             style = entry
-#         else:
-#             style = style_try[0][0]
-#         if style == "Intl.":
-#             if any(x in dances for x in ['C','S','R','P','J']):
-#                 style = "Latin"
-#             else:
-#                 style = "Standard"
-#         elif style == "Am.":
-#             if any(x in dances for x in ['W','T','F','V']):
-#                 style = "Smooth"
-#             else:
-#                 style = "Rhythm"
-#         elif style == "Ballroom":
-#             style = "Standard"
-#     else:
-#         style = style_try[0][0]
-#         # print style
-#     dances = [comp_res_references.dance_map[style][x] for x in dances]
-#     return (style, dances)
-
 event = ""
 level = ""
 dances = []
 style = ""
 
-for post in entries_post("mit"):
+# goes through entries line by line
+for post in entries_post(competition):
+    # determines whether it is a event title or competitor entry
     names = post.find_all('a')
     if len(names) != 0:
         for name in names:
@@ -143,22 +90,11 @@ for post in entries_post("mit"):
                 if not elig_true[0]:
                     print name_concat + " has placed out of " + event + " with " + str(elig_true[1]) + " points in " + level + " " + dance
     else:
+        # updates current event info
         event = post.text
         level = helpers.get_level(event)
         sty_dan = helpers.get_style_dances(event)
         style = sty_dan[0]
         dances = sty_dan[1]
-        # print '\n'+ event
-        # print level
-        # print dances
-        # print style
 
 pf_in.close()
-# def get_entries(event, competitor_id):
-#     entries = entries_post(event, competitor_id)
-#     entry_list = []
-#     for entry in entries:
-#         level = get_entry_level(entry.text).encode("utf8")
-#         style = get_entry_style(entry.text).encode("utf8")
-#         entry_list.append((level, style))
-#     return entry_list

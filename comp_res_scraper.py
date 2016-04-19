@@ -8,13 +8,8 @@ import pickle
 
 
 competitors = {}
-# comp_base_url = 'http://results.o2cm.com/event3.asp?event=hid16&bclr='
-# url_color = '#FFFFFF&tclr=#000000'
-# r = urllib2.urlopen(comp_base_url)
-# soup = BeautifulSoup(r)
-# names = soup.find(id="selEnt").find_all("option")
 
-# post request for results of event
+# post request to see all for results of event
 def entries_post(competition):
     #  only works until USA dance championships 07 because it switches to event2.asp
     url = "http://results.o2cm.com/event3.asp"
@@ -49,13 +44,10 @@ def entries_post(competition):
 # validates age category
 def validate_age_dances(curr_event):
     if len(re.findall("((Social)|(Teddy)|(Juvenile)|(Junior)|(Jr.)|(Youth)|(Yth.)|(Teen)|(Young)|(Under)|(under)|([0-9]-)|([0-9]+)|(Senior)){1}", curr_event)) > 0:
-        # print curr_event + " is not in the adult age category"
         return False
     elif len(re.findall("((T/S)|(Tea/)|(Stu/)|(Nine Dance)|(Ten Dance)|(Pro)|(Student)|(Mixed)|(WDSF)|(Scholar)|(Rookie)|(Solo)|(Lead)|(Follow)|(Club)|(Formation)|(Showdance)|(Team)|(SS-)){1}", curr_event)):
-        # print curr_event + " is not a valid ycn category"
         return False
     elif len(re.findall("((Polka)|(West Coast)|(Salsa)|(Hustle)|(Salsa)|(Argentine)|(Merengue)|(Lindy)|(Blues)|(Bachata)|(2-Step)|(Country)){1}", curr_event)) > 0:
-        # print curr_event + " is not a valid ycn dance"
         return False
     else:
         return True
@@ -113,6 +105,7 @@ def get_ycn_res(competition):
     curr_dances = []
     for post in entries_post(competition)[2:]:
         event = post.find_all('a')
+        # determines if it is an entry result or an event title
         if len(event) != 0:
             curr_event = event[0].text
             if validate_age_dances(curr_event):
@@ -128,12 +121,13 @@ def get_ycn_res(competition):
             res_entry = post.text
             placement = get_placement(res_entry)
             points = get_points(placement, curr_heats)
-
+            # do not make entry if there are no points to save on run time
             if points > 0:
                 names = res_entry[3:].split(' - ')[0]
                 start = names.find(' ') + 1
                 for name in names[start:].split(' & '):
                     if name.split(' ')[0] not in ['unknown', 'TBA']:
+                        # hash by full name without spaces
                         name_key = name.replace(' ', '')
                         if name_key not in competitors:
                             competitors[name_key] = comp_res_references.ycnObject(name)
@@ -141,7 +135,6 @@ def get_ycn_res(competition):
                             competitors[name_key].add_points(curr_level, curr_style, dance, points)
 
 
-# event_list = open("eventlist.txt", "w")
 
 req = urllib2.urlopen('http://www.o2cm.com/results/')
 soup = BeautifulSoup(req)
@@ -151,7 +144,6 @@ for comp_url in comp_urls:
     start = event_url.find('=') + 1
     competition = event_url[start:]
     print competition
-    # event_list.write(competition + '\n')
     get_ycn_res(competition)
     
 pf_out = open("comp_res.p", "wb")
