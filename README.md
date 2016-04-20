@@ -29,3 +29,6 @@ Helper functions shared between the entries and the results scraper
 ((T/S)|(Tea/)|(Stu/)|(Nine Dance)|(Ten Dance)|(Pro)|(Student)|(Mixed)|(WDSF)|(Scholar)|(Rookie)|(Solo)|(Lead)|(Follow)|(Club)|(Formation)|(Showdance)|(Team)|(SS-))
 
 ((Polka)|(West Coast)|(Salsa)|(Hustle)|(Salsa)|(Argentine)|(Merengue)|(Lindy)|(Blues)|(Bachata)|(2-Step)|(Country))
+
+###### known issues
+If you share a name with another competitor on o2cm, o2cm will not differentiate your results history and your combined results will be reflected in the scraped output file
