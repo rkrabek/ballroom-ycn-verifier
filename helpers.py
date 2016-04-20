@@ -66,13 +66,10 @@ def get_style_dances(event):
     else:
         style = style_try[0][0]
     if style in comp_res_references.style_list:
-        # print event
-        # event_list.write(event + '\n')
         try:
             dances = [comp_res_references.dance_map[style][x] for x in dances_abbr]
         except KeyError:
             dances = []
-            # event_list.write(event + " has dances in it which do not match the detected style \n")
             print event + " has dances in it which do not match the detected style"
     else:
         dances = []
