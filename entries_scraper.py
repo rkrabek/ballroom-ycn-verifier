@@ -13,7 +13,7 @@ print "loading pickle file"
 competitors = pickle.load(pf_in)
 print "done loading"
 
-competition = raw_input("Please enter event id as found on in the url of the entries list")
+competition = raw_input("Please enter event id as found on in the url of the entries list:")
 
 # determines if competitor has placed out based on current level points and points in 2 levels above
 def check_eligibility_pts(name, level, style, dance):
