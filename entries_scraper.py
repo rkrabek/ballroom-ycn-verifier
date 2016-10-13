@@ -8,7 +8,7 @@ import comp_res_references
 
 # loads in pickle file with competitor results
 competitors = {}
-pf_in = open("comp_res.p", "rb")
+pf_in = open("comp_res_new_test.p", "rb")
 print "loading pickle file"
 competitors = pickle.load(pf_in)
 print "done loading"
@@ -19,26 +19,13 @@ competition = raw_input("Please enter event id as found on in the url of the ent
 def check_eligibility_pts(name, level, style, dance):
     def pt_lookup(level):
         try:
-            return competitors[name].levels.__dict__[level].__dict__[style].__dict__[dance]
+            return helpers.get_points(competitors, name, level, style, dance)
         except KeyError:
             # There is no record of eligible ycn placement history in pickle file
             return 0
     l_index = comp_res_references.level_list.index(level)
     curr_lvl_pts = pt_lookup(level)
-    if l_index > 5:
-        return (True, 0)
-    else:
-        pt_trickle = (curr_lvl_pts + pt_lookup(comp_res_references.level_list[l_index+1]))
-        if l_index < 5:
-            if pt_trickle < 7:
-                if (pt_lookup(comp_res_references.level_list[l_index+2]) != 0):
-                    return (False, pt_trickle + 7)
-                else:
-                    return (True, pt_trickle)
-            else:
-                return (False, pt_trickle)
-        else:
-            return ((pt_trickle < 7), pt_trickle)
+    return (curr_lvl_pts < 7, curr_lvl_pts)
 
 # post request to see all entries of an event
 def entries_post(competition):

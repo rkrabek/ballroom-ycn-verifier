@@ -5,7 +5,7 @@ import helpers
 import requests
 import re
 import pickle
-
+import sys
 
 competitors = {}
 
@@ -134,18 +134,31 @@ def get_ycn_res(competition):
                         for dance in curr_dances:
                             competitors[name_key].add_points(curr_level, curr_style, dance, points)
 
+last_comp = ""
 
+if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] != "update"):
+    print "Usage: python comp_res_scraper.py [update]"
+elif len(sys.argv) == 2:
+    pickle_file = raw_input("Pickle file to load previous items from: ")
+    print "Loading pickle file"
+    competitors = pickle.load(open(pickle_file, "r"))
+    print "Done loading pickle file"
+    last_comp = raw_input("ID of the last comp included in the pickle file (e.g. adf16): ")
 
 req = urllib2.urlopen('http://www.o2cm.com/results/')
 soup = BeautifulSoup(req)
 comp_urls = soup.find_all('a')
+
 for comp_url in comp_urls:
     event_url = comp_url.get('href')
     start = event_url.find('=') + 1
     competition = event_url[start:]
+    if last_comp != "" and competition == last_comp:
+        break
     print competition
     get_ycn_res(competition)
-    
-pf_out = open("comp_res.p", "wb")
+
+output_file = raw_input("Pickle file to output results to: ")
+pf_out = open(output_file, "wb")
 pickle.dump(competitors, pf_out)
 pf_out.close()

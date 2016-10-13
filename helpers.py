@@ -74,3 +74,23 @@ def get_style_dances(event):
     else:
         dances = []
     return (style, dances)
+
+# gets the points for a competitor and a style, adding in points from above levels
+def get_points(competitors, name, level, style, dance):
+    level_index = comp_res_references.level_list.index(level)
+    counted_levels = comp_res_references.level_list[level_index:]
+    # Novice points don't count for lower levels
+    if counted_levels[0] != "Novice" and "Novice" in counted_levels:
+        counted_levels.remove("Novice")
+    points = 0
+    for i, currLevel in enumerate(counted_levels):
+        if i == 0:
+            # Points in this level count normal
+            points += competitors[name].levels.__dict__[currLevel].__dict__[style].__dict__[dance]
+        elif i == 1:
+            # Points in the level above count double
+            points += 2 * competitors[name].levels.__dict__[currLevel].__dict__[style].__dict__[dance]
+        else:
+            # Any placement in two levels above counts as 7 points
+            points += 7 if competitors[name].levels.__dict__[currLevel].__dict__[style].__dict__[dance] > 0 else 0
+    return points
