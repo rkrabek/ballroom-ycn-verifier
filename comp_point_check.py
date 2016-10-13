@@ -1,6 +1,6 @@
 import pickle
 import helpers
-pf_in = open("comp_res_new.p", "rb")
+pf_in = open("comp_res.p", "rb")
 competitors = pickle.load(pf_in)
 name = ""
 while name != 'na':
