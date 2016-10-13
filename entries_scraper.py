@@ -8,7 +8,7 @@ import comp_res_references
 
 # loads in pickle file with competitor results
 competitors = {}
-pf_in = open("comp_res_new_test.p", "rb")
+pf_in = open("comp_res.p", "rb")
 print "loading pickle file"
 competitors = pickle.load(pf_in)
 print "done loading"
