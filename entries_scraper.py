@@ -8,12 +8,12 @@ import comp_res_references
 
 # loads in pickle file with competitor results
 competitors = {}
-pf_in = open("comp_res.p", "rb")
+competition = raw_input("Please enter event id as found on in the url of the entries list:")
+
+pf_in = open("comp_res_2018Mar12.p", "rb")
 print "loading pickle file"
 competitors = pickle.load(pf_in)
 print "done loading"
-
-competition = raw_input("Please enter event id as found on in the url of the entries list:")
 
 # determines if competitor has placed out based on current level points and points in 2 levels above
 def check_eligibility_pts(name, level, style, dance):

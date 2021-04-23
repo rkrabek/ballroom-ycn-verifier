@@ -145,7 +145,7 @@ elif len(sys.argv) == 2:
     print "Done loading pickle file"
     last_comp = raw_input("ID of the last comp included in the pickle file (e.g. adf16): ")
 
-req = urllib2.urlopen('http://www.o2cm.com/results/')
+req = urllib2.urlopen('http://results.o2cm.com/')
 soup = BeautifulSoup(req)
 comp_urls = soup.find_all('a')
 
