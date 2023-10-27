@@ -5,6 +5,8 @@ import re
 import pickle
 import helpers
 import comp_res_references
+from mechanize import Browser
+
 
 # loads in pickle file with competitor results
 competitors = {}
@@ -30,33 +32,12 @@ def check_eligibility_pts(name, level, style, dance):
 # post request to see all entries of an event
 def entries_post(competition):
 
-    url = "http://entries.o2cm.com/default.asp"
+    br = Browser()
+    br.open("https://entries.o2cm.com/?event=" + competition)
+    br.select_form(name="webfilter")
+    br.submit()
     
-    headers = { "Accept":"text/html,application/xhtml+xml,application/xml;q0.9,image/webp,*/*;q0.8",
-                "Accept-Encoding":"gzip, deflate",
-                "Accept-Language":"en-US,en;q0.8",
-                "Cache-Control":"max-age0",
-                "Connection":"keep-alive",
-                "Content-Length":"69",
-                "Content-Type":"application/x-www-form-urlencoded",
-                "Cookie":"ASPSESSIONIDSQDRBDTTDOOHOKCBDPOBDGELJDLKOJLO; ASPSESSIONIDSSBRBCTTOMEKMGPBBLLEEANOMIMLPOMI",
-                "Host":"entries.o2cm.com",
-                "Origin":"http//entries.o2cm.com",
-                "Referer":"http//entries.o2cm.com/default.asp",
-                "user-agent":"entries-scraper"
-    }
-    
-    payload = { "selDiv": "",
-                "selAge": 00,
-                "selSkl": 00,
-                "selSty": "",
-                "submit": "OK",
-                "selEnt": "",
-                "event": competition
-    }
-    
-    r = requests.post(url, headers=headers, data=payload).text
-    soup = BeautifulSoup(r)
+    soup = BeautifulSoup(br.response().read(), "html.parser")
     entries = soup.find_all('td', {"class":["h5b", "h5n"]})
     return entries
 
@@ -76,6 +57,8 @@ for post in entries_post(competition):
                 elig_true = check_eligibility_pts(name_concat, level, style, dance)
                 if not elig_true[0]:
                     print name_concat + " has placed out of " + event + " with " + str(elig_true[1]) + " points in " + level + " " + dance
+                #else:
+                    #print name_concat + " is ok to dance " + event + " with " + str(elig_true[1]) + " points in " + level + " " + dance
     else:
         # updates current event info
         event = post.text
