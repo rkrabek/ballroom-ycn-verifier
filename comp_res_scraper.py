@@ -6,38 +6,20 @@ import requests
 import re
 import pickle
 import sys
+from mechanize import Browser
 
 competitors = {}
 
 # post request to see all for results of event
 def entries_post(competition):
-    #  only works until USA dance championships 07 because it switches to event2.asp
-    url = "http://results.o2cm.com/event3.asp"
-    
-    headers = { "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "Accept-Encoding":"gzip, deflate",
-                "Accept-Language":"en-US,en;q=0.8",
-                "Cache-Control":"max-age=0",
-                "Connection":"keep-alive",
-                "Content-Length":"61",
-                "Content-Type":"application/x-www-form-urlencoded",
-                "Cookie":"ASPSESSIONIDQSCQBCST=ENACDHMCCJJNNCKJGLKAGBAG; ASPSESSIONIDSQDQACSS=LDNCAPFAAHLLLNKMPLEPPJBO; ASPSESSIONIDSQDRBDTT=LFLGOKCBLMEHPFMNPINFBMCE; ASPSESSIONIDSSCQBCSS=NEPKLCMCJAGFIKFCPEKKBCEB; ASPSESSIONIDSQDRADTT=OLJDLOIDAEOLHMCIJKIAIGEF; ASPSESSIONIDQQBSACTS=BHHMGGCBLFHJPMDFMAFPGAIN; ASPSESSIONIDSQBQADTT=HKGFFCPBPEGGCAJGLCCCMLGL",
-                "Host":"results.o2cm.com",
-                "Origin":"http://results.o2cm.com",
-                "Referer":"http://results.o2cm.com/event3.asp",
-                "user-agent":"ycn-points-scraper"
-    }
 
-    payload = { "selDiv": "",
-                "selAge": "",
-                "selSkl": "",
-                "selSty": "",
-                "selEnt": "",
-                "submit": "OK",
-                "event": competition
-    }            
-    r = requests.post(url, headers=headers, data=payload).text
-    soup = BeautifulSoup(r)
+    url = "https://results.o2cm.com/event3.asp?event=" + competition
+    br = Browser()
+    br.open(url)
+    br.select_form(name="webfilter")
+    br.submit()
+    
+    soup = BeautifulSoup(br.response().read(), "html.parser")
     entries = soup.find_all('td', {"class":["h5b", "t2b"]})
     return (entries)
 
@@ -85,7 +67,7 @@ def set_curr_heats(event, curr_style, curr_level):
     if curr_style in comp_res_references.style_list and curr_level in comp_res_references.level_list:
         e_url = event[0].get('href')
         try:
-            e_page = BeautifulSoup(urllib2.urlopen("http://results.o2cm.com/"+e_url)).find(id="selCount")
+            e_page = BeautifulSoup(urllib2.urlopen("http://results.o2cm.com/"+e_url), features="html5lib").find(id="selCount")
             return get_heats(e_page)
         except urllib2.HTTPError:
             print "Error 500, possibly no entries"
@@ -146,7 +128,7 @@ elif len(sys.argv) == 2:
     last_comp = raw_input("ID of the last comp included in the pickle file (e.g. adf16): ")
 
 req = urllib2.urlopen('http://results.o2cm.com/')
-soup = BeautifulSoup(req)
+soup = BeautifulSoup(req, "html.parser")
 comp_urls = soup.find_all('a')
 
 for comp_url in comp_urls:
